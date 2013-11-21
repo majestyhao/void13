@@ -1,0 +1,15 @@
+ChangeLog for hostapd
+
+2004-02-08 - v0.1.3
+	* fixed event loop to call signal handlers only after returning from
+	  the real signal handler
+	* reset sta->timeout_next after successful association to make sure
+	  that the previously registered inactivity timer will not remove the
+	  STA immediately (e.g., if STA deauthenticates and re-associates
+	  before the timer is triggered).
+
+
+Note:
+
+Older changes up to and including v0.1.0 are included in the ChangeLog
+of the Host AP driver.
