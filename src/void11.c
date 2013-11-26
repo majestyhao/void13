@@ -35,10 +35,26 @@
 #error "Linux Wireless Extensions version 9 or newer required"
 #endif
 
+/*
 #include "hostapd.h"
 #include "ieee802_1x.h"
 #include "ieee802_11.h"
 #include "accounting.h"
+#include "eapol_sm.h"
+#include "iapp.h"
+#include "ap.h"
+#include "ieee802_11_auth.h"
+#include "sta_info.h"
+#include "driver.h"
+#include "radius_client.h"
+
+#include "void11.h"
+*/
+
+#include "ap/hostapd.h"
+#include "lib/ieee802_1x.h"
+#include "lib/ieee802_11.h"
+#include "ap/accounting.h"
 #include "eapol_sm.h"
 #include "iapp.h"
 #include "ap.h"
