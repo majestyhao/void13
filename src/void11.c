@@ -87,83 +87,6 @@ int macstr2addr(char *macstr, u8 *addr)
 	return 0;
 }
 
-int void11_parse_elements(hostapd *void11, u8 *start, 
-			  size_t len,
-			  struct ieee802_11_elems *elems)
-{
-	size_t left = len;
-	u8 *pos = start;
-	int unknown = 0;
-	
-	memset(elems, 0, sizeof(*elems));
-	
-	while (left >= 2) {
-		u8 id, elen;
-
-		id = *pos++;
-		elen = *pos++;
-		left -= 2;
-
-		if (elen > left) {
-			if(void11->conf->debug > 2)
-				DPRINT("IEEE 802.11 element parse failed "
-				       "(id=%d elen=%d left=%d)\n",
-				       id, elen, left);
-			return(1);
-		}
-
-		switch (id) {
-		case WLAN_EID_SSID:
-			elems->ssid = pos;
-			elems->ssid_len = elen;
-			break;
-		case WLAN_EID_SUPP_RATES:
-			elems->supp_rates = pos;
-			elems->supp_rates_len = elen;
-			break;
-		case WLAN_EID_FH_PARAMS:
-			elems->fh_params = pos;
-			elems->fh_params_len = elen;
-			break;
-		case WLAN_EID_DS_PARAMS:
-			elems->ds_params = pos;
-			elems->ds_params_len = elen;
-			break;
-		case WLAN_EID_CF_PARAMS:
-			elems->cf_params = pos;
-			elems->cf_params_len = elen;
-			break;
-		case WLAN_EID_TIM:
-			elems->tim = pos;
-			elems->tim_len = elen;
-			break;
-		case WLAN_EID_IBSS_PARAMS:
-			elems->ibss_params = pos;
-			elems->ibss_params_len = elen;
-			break;
-		case WLAN_EID_CHALLENGE:
-			elems->challenge = pos;
-			elems->challenge_len = elen;
-			break;
-		default:
-			if(void11->conf->debug > 2)
-				DPRINT("IEEE 802.11 element parse ignored "
-				       "unknown element (id=%d elen=%d)\n",
-				       id, elen);
-			unknown++;
-			break;
-		}
-
-		left -= elen;
-		pos += elen;
-	}
-
-	if (left)
-		return(1);
-
-	return(unknown ? 1 : 0);
-}
-
 struct void11_ap *void11_read(hostapd *void11)
 {
 	int len;
@@ -178,13 +101,20 @@ struct void11_ap *void11_read(hostapd *void11)
 	if((len = read(void11->ctrl_sock, buf, sizeof(buf))) < 0)
 		return(NULL);
 	
-	if(void11->conf->debug >= HOSTAPD_DEBUG_MSGDUMPS + 1) {
-		int i;
-		DPUT("  dump:");
-		for (i = 0; i < len; i++)
-			DPRINT(" %02x", buf[i]);
-		DPUT("\n");
-	}
+	// if(void11->conf->debug >= HOSTAPD_DEBUG_MSGDUMPS + 1) {
+	//if(void11->conf->debug >= 3 + 1) {
+		//int i;
+		//DPUT("  dump:");
+		//for (i = 0; i < len; i++)
+		//	DPRINT(" %02x", buf[i]);
+		//DPUT("\n");
+	//}
+
+	//wpa_printf(MSG_DEBUG, "IEEE 802.11 element "
+						   //"parse failed (id=%d elen=%d "
+						  // "left=%lu)",
+						  // id, elen, (unsigned long) left);
+					//wpa_hexdump(MSG_MSGDUMP, "IEs", start, len);
 
 	hdr = (struct ieee80211_mgmt*)buf;
 	fc = le_to_host16(hdr->frame_control);
@@ -201,7 +131,7 @@ struct void11_ap *void11_read(hostapd *void11)
 		       len,
 		       MAC2STR(a->bssid));
 	
-	(void) void11_parse_elements(void11, hdr->u.beacon.variable,
+	(void) ieee802_11_parse_elems(void11, hdr->u.beacon.variable,
 				      len - (IEEE80211_HDRLEN + 
 					     sizeof(hdr->u.beacon)), 
 				      &a->elems);

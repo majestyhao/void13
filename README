@@ -9,6 +9,25 @@ replace ssid to ssid.ssid
 replace sock&ioctlsock to ctrl_sock
 delete duplicate funcions at void11.c (copy driver.c)
 #include "common/ieee802_11_defs.h" for soma macros
+debug: if (show_errors) {
+				wpa_printf(MSG_DEBUG, "IEEE 802.11 element "
+					   "parse failed (id=%d elen=%d "
+					   "left=%lu)",
+					   id, elen, (unsigned long) left);
+				wpa_hexdump(MSG_MSGDUMP, "IEs", start, len);
+			}
+		replaces 
+		HOSTAPD_DEBUG(HOSTAPD_DEBUG_MINIMAL,
+				      "IEEE 802.11 element parse failed "
+				      "(id=%d elen=%d left=%d)\n",
+				      id, elen, left);	
+		which equals
+		do { \
+	if (hapd->conf->debug >= (HOSTAPD_DEBUG_MINIMAL)) \
+		printf("IEEE 802.11 element parse failed "
+				      "(id=%d elen=%d left=%d)\n",
+				      id, elen, left); \
+} while (0)		      
 
 void11::
 void11.c: 
