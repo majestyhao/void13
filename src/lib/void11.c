@@ -300,6 +300,7 @@ int void11_deauth_all_stas(hostapd *void11, u8 *station, u8 *bssid)
 	memcpy(mgmt.bssid, bssid, ETH_ALEN);
 	mgmt.u.deauth.reason_code =
 		host_to_le16(WLAN_REASON_PREV_AUTH_NOT_VALID);
+	// void11 (hostapd/hostapd_data) here: sock, conf -> debug
 	if(send(void11->sock, &mgmt, IEEE80211_HDRLEN + sizeof(mgmt.u.deauth),
 		0) < 0) {
 		if(void11->conf->debug > HOSTAPD_DEBUG_MINIMAL)

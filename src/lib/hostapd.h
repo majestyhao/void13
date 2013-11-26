@@ -45,9 +45,10 @@ struct ieee80211_hdr {
 extern unsigned char rfc1042_header[6];
 
 typedef struct hostapd_data {
-	struct hostapd_config *conf;
+	struct hostapd_config *conf; //here: conf **********
 	char *config_fname;
 
+	//here: sock ***********
 	int sock; /* raw packet socket for driver access */
 	int ioctl_sock; /* socket for ioctl() use */
 	u8 own_addr[6];
