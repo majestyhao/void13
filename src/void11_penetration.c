@@ -29,7 +29,7 @@
 #include <getopt.h>
 #include <signal.h>
 
-#include "lib/void11.h"
+#include "void11.h"
 
 static int delay = VOID11_DEFAULT_DELAY;
 static int type = VOID11_DEFAULT_TYPE;

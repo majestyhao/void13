@@ -35,8 +35,8 @@
 #error "Linux Wireless Extensions version 9 or newer required"
 #endif
 
-#include "hostapd.h"
-#include "ieee802_11.h"
+#include "lib/hostapd.h"
+#include "lib/ieee802_11.h"
 
 #ifndef VOID11_HEADER
 #define VOID11_HEADER
