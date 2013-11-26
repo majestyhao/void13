@@ -37,7 +37,7 @@ struct hapd_interfaces {
 	int (*driver_init)(struct hostapd_iface *iface);
 
 	size_t count;
-	int global_ctrl_sock;
+	int global_ctrl_sock;   //maybe here ***********************
 	char *global_iface_path;
 	char *global_iface_name;
 	struct hostapd_iface **iface;
@@ -202,7 +202,7 @@ struct hostapd_iface {
 	struct hapd_interfaces *interfaces;
 	void *owner;
 	char *config_fname;
-	struct hostapd_config *conf;
+	struct hostapd_config *conf; //here **************
 
 	size_t num_bss;
 	struct hostapd_data **bss;
