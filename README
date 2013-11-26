@@ -22,4 +22,5 @@ void11: hostapd *void11
 hostapd:
 hapd: hostapd *hapd
 hostapd: hostapd_data
+config.h/c = ap_config.h
 
