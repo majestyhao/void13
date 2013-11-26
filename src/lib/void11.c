@@ -284,7 +284,7 @@ struct void11_ap *void11_read(hostapd *void11)
 	return(a);
 }
 
-/**** Change Here -Hao *****/
+/**** Change Here -Hao **************************************/
 int void11_deauth_all_stas(hostapd *void11, u8 *station, u8 *bssid)
 {
 	struct ieee80211_mgmt mgmt;
@@ -307,6 +307,18 @@ int void11_deauth_all_stas(hostapd *void11, u8 *station, u8 *bssid)
 			perror("void11_deauth_all_stas: send");
 		return(-1);
 	}
+	/*
+	 * Hao
+	 * void11: hapd_interface & hostapd_interface
+	 *  hostapd_iface *void13
+	 *  hapd_interfaces *void13_a
+	 * if(send(void13_a->sock, &mgmt, IEEE80211_HDRLEN + sizeof(mgmt.u.deauth),
+		0) < 0) {
+		if(void11->conf->debug > HOSTAPD_DEBUG_MINIMAL)
+			perror("void11_deauth_all_stas: send");
+		return(-1);
+	}
+	 */
 
 	return 0;
 }

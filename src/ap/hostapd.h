@@ -24,10 +24,10 @@ struct full_dynamic_vlan;
 enum wps_event;
 union wps_event_data;
 
-struct hostapd_iface;
+struct hostapd_iface; // main interface *********************
 
 struct hapd_interfaces {
-	int (*reload_config)(struct hostapd_iface *iface);
+	int (*reload_config)(struct hostapd_iface *iface);//conf here? ******************
 	struct hostapd_config * (*config_read_cb)(const char *config_fname);
 	int (*ctrl_iface_init)(struct hostapd_data *hapd);
 	void (*ctrl_iface_deinit)(struct hostapd_data *hapd);
@@ -69,8 +69,8 @@ struct hostapd_frame_info {
  */
 struct hostapd_data {
 	struct hostapd_iface *iface;
-	struct hostapd_config *iconf;
-	struct hostapd_bss_config *conf;
+	struct hostapd_config *iconf; //conf here? ***************
+	struct hostapd_bss_config *conf; //or here ***************
 	int interface_added; /* virtual interface added for this BSS */
 
 	u8 own_addr[ETH_ALEN];
@@ -115,7 +115,7 @@ struct hostapd_data {
 	int michael_mic_failures;
 	int tkip_countermeasures;
 
-	int ctrl_sock;
+	int ctrl_sock; //scok: read, here ******************************
 	struct wpa_ctrl_dst *ctrl_dst;
 
 	void *ssl_ctx;
@@ -202,7 +202,7 @@ struct hostapd_iface {
 	struct hapd_interfaces *interfaces;
 	void *owner;
 	char *config_fname;
-	struct hostapd_config *conf; //here **************
+	struct hostapd_config *conf; //conf here **************
 
 	size_t num_bss;
 	struct hostapd_data **bss;

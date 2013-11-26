@@ -2,3 +2,24 @@ void13
 ======
 
 void13 based on void11
+
+void11::
+void11.c: 
+int void11_deauth_all_stas(hostapd *void11, u8 *station, u8 *bssid) {
+***
+// void11 (hostapd/hostapd_data) here: sock, conf -> debug
+	if(send(void11->sock, &mgmt, IEEE80211_HDRLEN + sizeof(mgmt.u.deauth),
+		0) < 0) {
+		if(void11->conf->debug > HOSTAPD_DEBUG_MINIMAL)
+			perror("void11_deauth_all_stas: send");
+		return(-1);
+	}
+}
+
+void11: hostapd *void11
+
+
+hostapd:
+hapd: hostapd *hapd
+hostapd: hostapd_data
+
