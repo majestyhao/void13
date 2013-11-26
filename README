@@ -2,6 +2,13 @@ void13
 ======
 
 void13 based on void11
+./void11_penetration wlan0 -t 1 -S peznet -s MAC-of-Victim
+station == stapr == MAC-of-Victim
+optarg = SSID own_addr = SSID's MAC\
+replace ssid to ssid.ssid
+replace sock&ioctlsock to ctrl_sock
+delete duplicate funcions at void11.c (copy driver.c)
+#include "common/ieee802_11_defs.h" for soma macros
 
 void11::
 void11.c: 

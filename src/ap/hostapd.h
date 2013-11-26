@@ -67,7 +67,7 @@ struct hostapd_frame_info {
 /**
  * struct hostapd_data - hostapd per-BSS data structure
  */
-struct hostapd_data {
+typedef struct hostapd_data {
 	struct hostapd_iface *iface;
 	struct hostapd_config *iconf; //conf here? ***************
 	struct hostapd_bss_config *conf; //or here ***************
@@ -192,7 +192,7 @@ struct hostapd_data {
 #ifdef CONFIG_SQLITE
 	struct hostapd_eap_user tmp_eap_user;
 #endif /* CONFIG_SQLITE */
-};
+} hostapd;
 
 
 /**

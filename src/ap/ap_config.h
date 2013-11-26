@@ -214,7 +214,7 @@ struct hostapd_bss_config {
 	u8 *radius_das_shared_secret;
 	size_t radius_das_shared_secret_len;
 
-	struct hostapd_ssid ssid;
+	struct hostapd_ssid ssid;//ssid
 
 	char *eap_req_id_text; /* optional displayable message sent with
 				* EAP Request-Identity */
