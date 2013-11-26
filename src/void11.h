@@ -90,18 +90,13 @@ struct void11_ap {
 
 /* functions */
 int macstr2addr(char *macstr, u8 *addr);
-int void11_set_iface_flags(hostapd *void11, int dev_up);
-int void11_ioctl(hostapd *void11, struct prism2_hostapd_param *param);
-int void11_ioctl_prism2param(hostapd *void11, int param, int value);
-int void11_ioctl_setiwessid(hostapd *void11, char *buf, int len);
-int void11_ioctl_setchannel(hostapd *void11, int channel);
 
 int void11_deauth_all_stas(hostapd *void11, u8 *station, u8 *bssid);
 int void11_assoc_req(hostapd *void11, u8 *bssid);
 int void11_auth_req(hostapd *void11, u8 *bssid);
 
-struct void11_ap *void11_read(hostapd *void11);
-int void11_init(hostapd *void11, char *iface);
+struct void11_ap *void11_read(hostapd *void11);//
+int void11_init(hostapd *void11, char *iface);//
 int void11_exit(hostapd *void11);
 
 #endif /* VOID11_HEADER */

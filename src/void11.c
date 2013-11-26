@@ -86,81 +86,7 @@ int macstr2addr(char *macstr, u8 *addr)
 	return 0;
 }
 
-int void11_set_iface_flags(hostapd *void11, int dev_up)
-{
-	struct ifreq ifr;
-	int ret = 0;
 
-	if(void11->ioctl_sock < 0)
-		return(-EBADF);
-	
-	memset(&ifr, 0, sizeof(ifr));
-	snprintf(ifr.ifr_name, IFNAMSIZ, "%sap", void11->conf->iface);
-
-	if((ret = ioctl(void11->ioctl_sock, SIOCGIFFLAGS, &ifr)) != 0) {
-		perror("ioctl[SIOCGIFFLAGS]");
-		return(ret);
-	}
-
-	if(dev_up)
-		ifr.ifr_flags |= IFF_UP;
-	else
-		ifr.ifr_flags &= ~IFF_UP;
-
-	if((ret = ioctl(void11->ioctl_sock, SIOCSIFFLAGS, &ifr)) != 0) {
-		perror("ioctl[SIOCSIFFLAGS]");
-		return(ret);
-	}
-
-	if(dev_up) {
-		memset(&ifr, 0, sizeof(ifr));
-		snprintf(ifr.ifr_name, IFNAMSIZ, "%sap", void11->conf->iface);
-		ifr.ifr_mtu = HOSTAPD_MTU;
-		if(ioctl(void11->ioctl_sock, SIOCSIFMTU, &ifr) != 0) {
-			perror("ioctl[SIOCSIFMTU]");
-			DPUT("Setting MTU failed - trying to survive with "
-			     "current value\n");
-		}
-	}
-
-	return(0);
-}
-
-int void11_ioctl(hostapd *void11, struct prism2_hostapd_param *param)
-{
-	struct iwreq iwr;
-
-	memset(&iwr, 0, sizeof(iwr));
-	strncpy(iwr.ifr_name, void11->conf->iface, IFNAMSIZ);
-	iwr.u.data.pointer = (caddr_t) param;
-	iwr.u.data.length = sizeof(*param);
-
-	if (ioctl(void11->ioctl_sock, PRISM2_IOCTL_HOSTAPD, &iwr) < 0) {
-		perror("ioctl[PRISM2_IOCTL_HOSTAPD]");
-		return(-1);
-	}
-
-	return(0);
-}
-
-int void11_ioctl_prism2param(hostapd *void11, int param, int value)
-{
-	struct iwreq iwr;
-	int *i;
-
-	memset(&iwr, 0, sizeof(iwr));
-	strncpy(iwr.ifr_name, void11->conf->iface, IFNAMSIZ);
-	i = (int *) iwr.u.name;
-	*i++ = param;
-	*i++ = value;
-
-	if (ioctl(void11->ioctl_sock, PRISM2_IOCTL_PRISM2_PARAM, &iwr) < 0) {
-		perror("ioctl[PRISM2_IOCTL_PRISM2_PARAM]");
-		return(-1);
-	}
-
-	return(0);
-}
 
 int void11_parse_elements(hostapd *void11, u8 *start, 
 			  size_t len,
@@ -312,137 +238,13 @@ int void11_deauth_all_stas(hostapd *void11, u8 *station, u8 *bssid)
 	return 0;
 }
 
-int void11_assoc_req(hostapd *void11, u8 *bssid)
-{
-	struct ieee80211_assoc {
-		u16 frame_control;
-		u16 duration;
-		u8 da[6];
-		u8 sa[6];
-		u8 bssid[6];
-		u16 seq_ctrl;
-		u16 capab_info;
-		u16 listen_interval;
-		/* followed by SSID and Supported rates */
-		u8 variable[void11->conf->ssid_len + 7];
-	} mgmt;
-	FILE *rndsrc = fopen("/dev/urandom", "r");
-	int i = 0;
-	u8 *p;
-
-	memset(&mgmt, 0, sizeof(mgmt));
-	p = (u8*)&mgmt.variable;
-
-	mgmt.frame_control = IEEE80211_FC(WLAN_FC_TYPE_MGMT,
-					  WLAN_FC_STYPE_ASSOC_REQ);
-	mgmt.sa[i++] = 0x00;
-	for(; i < ETH_ALEN; i++)
-		mgmt.sa[i] = getc(rndsrc);
-	memset(mgmt.da, 0xff, ETH_ALEN);
-	memcpy(mgmt.da, bssid, ETH_ALEN);
-	memcpy(mgmt.bssid, bssid, ETH_ALEN);
-	mgmt.capab_info = host_to_le16(WLAN_CAPABILITY_ESS);;
-	mgmt.listen_interval = host_to_le16(1);
-
-	*p++ = WLAN_EID_SSID;
-	*p++ = host_to_le16(void11->conf->ssid_len);
-	memcpy(p, void11->conf->ssid, void11->conf->ssid_len);
-	p += void11->conf->ssid_len;
-	*p++ = WLAN_EID_SUPP_RATES;
-	*p++ = 4; /* len */
-	*p++ = 0x82; /* 1 Mbps, base set */
-	*p++ = 0x84; /* 2 Mbps, base set */
-	*p++ = 0x0b; /* 5.5 Mbps */
-	*p++ = 0x16; /* 11 Mbps */
-
-	if(send(void11->sock, &mgmt, sizeof(mgmt) + 1, 0) < 0) {
-		if(void11->conf->debug > HOSTAPD_DEBUG_MINIMAL)
-			perror("void11_ap_dos: send");
-		fclose(rndsrc);
-		return -1;
-	}
-
-	fclose(rndsrc);
-	return(0);
-}
-
-int void11_auth_req(hostapd *void11, u8 *bssid)
-{
-	struct ieee80211_mgmt mgmt;
-	FILE *rndsrc = fopen("/dev/urandom", "r");
-	int i = 0;
-
-	memset(&mgmt, 0, sizeof(mgmt));
-
-	mgmt.frame_control = IEEE80211_FC(WLAN_FC_TYPE_MGMT,
-					  WLAN_FC_STYPE_AUTH);
-	mgmt.sa[i++] = 0x00;
-	for(; i < ETH_ALEN; i++)
-		mgmt.sa[i] = getc(rndsrc);
-	memset(mgmt.da, 0xff, ETH_ALEN);
-	memcpy(mgmt.da, bssid, ETH_ALEN);
-	memcpy(mgmt.bssid, bssid, ETH_ALEN);
-	mgmt.u.auth.auth_alg = 0;
-	mgmt.u.auth.auth_transaction = host_to_le16(1);
-	mgmt.u.auth.status_code = 0;
-
-	if(send(void11->sock, &mgmt, IEEE80211_HDRLEN + sizeof(mgmt.u.auth), 0) < 0) {
-		if(void11->conf->debug > HOSTAPD_DEBUG_MINIMAL)
-			perror("void11_ap_dos: send");
-		fclose(rndsrc);
-		return(-1);
-	}
-
-	fclose(rndsrc);
-	return(0);
-}
-
-int void11_ioctl_setiwessid(hostapd *void11, char *buf, int len)
-{
-	struct iwreq iwr;
-        int ret = 0;
-
-	memset(&iwr, 0, sizeof(iwr));
-	strncpy(iwr.ifr_name, void11->conf->iface, IFNAMSIZ);
-	iwr.u.essid.flags = 1; /* SSID active */
-	iwr.u.essid.pointer = (caddr_t) buf;
-	iwr.u.essid.length = len;
-
-	if((ret = ioctl(void11->ioctl_sock, SIOCSIWESSID, &iwr)) < 0) {
-		perror("ioctl[SIOCSIWESSID]");
-		DPRINT("len=%d\n", len);
-		return(ret);
-	}
-
-	return(0);
-}
-
-int void11_ioctl_setchannel(hostapd *void11, int channel)
-{
-	struct iwreq iwr;
-        int ret = 0;
-
-	memset(&iwr, 0, sizeof(iwr));
-	strncpy(iwr.ifr_name, void11->conf->iface, IFNAMSIZ);
-
-	iwr.u.freq.m = channel;
-	iwr.u.freq.e = 0; 
-
-	if((ret = ioctl(void11->ioctl_sock, SIOCSIWFREQ, &iwr)) < 0) {
-		perror("ioctl[SIOCSIWFREQ]");
-		return(ret);
-	}
-
-	return(0);
-}
-
 int void11_flush(hostapd *void11)
 {
 	struct prism2_hostapd_param param;
 
 	memset(&param, 0, sizeof(param));
 	param.cmd = PRISM2_HOSTAPD_FLUSH;
-	return(void11_ioctl(void11, &param));
+	return(hostapd_ioctl(void11, &param));
 }
 
 int void11_init(hostapd *void11, char *iface)
@@ -475,7 +277,7 @@ int void11_init(hostapd *void11, char *iface)
 		return(ret);
         }
 
- 	if((ret = void11_set_iface_flags(void11, 1)) != 0) {
+ 	if((ret = hostapd_set_iface_flags(void11, 1)) != 0) {
 		void11_exit(void11);
 		return(ret);
 	}
@@ -517,7 +319,7 @@ int void11_init(hostapd *void11, char *iface)
 	
 	/* Set SSID for the kernel driver (to be used in beacon and probe
 	 * response frames) */
-	if((ret = void11_ioctl_setiwessid(void11, 
+	if((ret = hostap_ioctl_setiwessid(void11,
 					  void11->conf->ssid, 
 					  void11->conf->ssid_len)) != 0) {
 		DPUT("Could not set SSID for kernel driver\n");
@@ -534,7 +336,7 @@ int void11_exit(hostapd *void11)
 {
         void11_flush(void11);
 
-	void11_set_iface_flags(void11, 0);
+        hostapd_set_iface_flags(void11, 0);
 	
         if (void11->sock >= 0)
 	  close(void11->sock);

@@ -50,7 +50,7 @@ typedef struct hostapd_data {
 
 	int sock; /* raw packet socket for driver access */
 	int ioctl_sock; /* socket for ioctl() use */
-	u8 own_addr[6];
+	u8 own_addr[6];//SSID
 
 	int num_sta; /* number of entries in sta_list */
 	struct sta_info *sta_list; /* STA info list head */

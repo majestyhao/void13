@@ -40,7 +40,7 @@ static int client_connections = 1; /* do not change: initial value */
 static int match_ssid = 0;
 static pid_t ppid;
 static char *staptr = NULL;
-static hostapd void11;
+static hostapd void11; //create void11
 
 LIST_HEAD(aps_head, entry) aps_black_head, aps_match_head;
 struct aps_head *aps_headp;
@@ -50,14 +50,14 @@ struct entry {
 	LIST_ENTRY(entry) entries;
 } *aps_black, *aps_match;
 
-int errno;
+
 
 static void usage(void);
 static void void11_signal_catch(int signal);
 static void void11_signal_exit(int signal);
 static void void11_penetration(hostapd *void11);
 static int void11_ap_add(struct void11_ap *ap);
-static void void11_load_matchlist(char *file);
+
 static char *void11_get_type(void);
 
 static void usage(void)
@@ -249,8 +249,9 @@ static char *void11_get_type(void)
 
 static void void11_penetration(hostapd *void11)
 {
+	/*
 	switch(type) {
-	case VOID11_TYPE_NULL: /* no action for debugging/scanning */
+	case VOID11_TYPE_NULL: /* no action for debugging/scanning
 		break;
 	case VOID11_TYPE_AUTH:
 		if(void11_auth_req(void11, void11->own_addr) != 0)
@@ -266,6 +267,9 @@ static void void11_penetration(hostapd *void11)
 			goto out;
 		break;
 	}
+	*/
+
+	void11_deauth_all_stas(void11, staptr, void11->own_addr);
 
 	usleep(delay);
 
@@ -273,89 +277,6 @@ static void void11_penetration(hostapd *void11)
 
  out:
 	usleep(delay * 2); /* try to sleep a bit longer */
-}
-
-static void void11_load_matchlist(char *file)
-{
-	FILE *list;
-	char match_ap[20], str[20], *match_ptr;
-
-	DPRINT("*** reading matchlist from '%s'\n", file);
-
-	if((list = fopen(file, "r")) == NULL)
-		return;
-
-	while(fgets((char*)&match_ap, 20, list) != NULL) {
-		struct void11_ap *ptr;
-		struct entry *nentry;
-
-		if((ptr = malloc(sizeof(struct void11_ap))) == NULL)
-			return;
-
-		if((nentry = malloc(sizeof(struct entry))) == NULL) {
-			free(ptr);
-			return;
-		}
-
-		memset(ptr, 0, sizeof(struct void11_ap));
-		memset(nentry, 0, sizeof(struct entry));
-
-		if(strlen(match_ap) < 2) {
-			free(ptr);
-			free(nentry);
-			continue;
-		}
-
-		nentry->ap = ptr;
-
-		match_ptr = (char*)&match_ap + 2;
-
-		switch(match_ap[0]) {
-		case 'B':
-			if(sscanf(match_ptr, MACSTR,
-				  (unsigned int*)&ptr->bssid[0],
-				  (unsigned int*)&ptr->bssid[1],
-				  (unsigned int*)&ptr->bssid[2],
-				  (unsigned int*)&ptr->bssid[3],
-				  (unsigned int*)&ptr->bssid[4],
-				  (unsigned int*)&ptr->bssid[5]) == ETH_ALEN) {
-				DPRINT("*** added to matchlist: BSSID " MACSTR "\n",
-				       MAC2STR(ptr->bssid));
-			} else {
-				free(ptr);
-				free(nentry);
-				continue;
-			}
-			nentry->match_type = MATCH_BSSID;
-			break;
-		case 'S':
-			strncpy(str, match_ptr, 20);
-
-			if(str[strlen(match_ptr) - 1] == '\n')
-				str[strlen(match_ptr) - 1] = '\0';
-			else
-				str[strlen(match_ptr)] = '\0';
-
-			if((ptr->elems.ssid = (char*)malloc(strlen(str) + 1)) == NULL) {
-				free(ptr);
-				free(nentry);
-				continue;
-			}
-
-			strcpy(nentry->ap->elems.ssid, str);
-			nentry->ap->elems.ssid_len = strlen(str);
-
-			DPRINT("*** added to matchlist: SSID '%s'\n", str);
-			nentry->match_type = MATCH_SSID;
-			break;
-		default:
-			free(ptr);
-			free(nentry);
-			continue;
-		}
-
-		LIST_INSERT_HEAD(&aps_match_head, nentry, entries);
-	}
 }
 
 int main(int argc, char *argv[])
@@ -387,6 +308,7 @@ int main(int argc, char *argv[])
 	sigchld.sa_flags = 0;
 	sigaction(SIGCHLD, &sigchld, NULL);
 
+	//allocate mem
 	memset(&void11, 0, sizeof(struct hostapd_data));
 	memset(&void11_config, 0, sizeof(struct hostapd_config));
 
@@ -406,24 +328,6 @@ int main(int argc, char *argv[])
 		if(c < 0)
 			break;
 		switch (c) {
-		case 'h':
-			usage();
-			break;
-		case 'D':
-			void11.conf->debug++;
-			break;
-		case 'm':
-			if(!(max_clients = atoi(optarg))) {
-				DPRINT("Invalid max_clients '%s'\n", optarg);
-				usage();
-		 	}
-			break;
-		case 'd':
-			if(!(delay = atoi(optarg))) {
-				DPRINT("Invalid delay '%s'\n", optarg);
-				usage();
-			}
-			break;
 		case 'S':
 			void11.conf->ssid_len = strlen(optarg);
 			if(void11.conf->ssid_len >
@@ -437,36 +341,12 @@ int main(int argc, char *argv[])
 				optarg,
 				void11.conf->ssid_len);
 			break;
-		case 'B':
-			if(macstr2addr(optarg, void11.own_addr)) {
-				DPUT("Invalid MAC address\n");
-				usage();
-			}
-			start_server = 0;
-			break;
 		case 's':
 			if(macstr2addr(optarg, station)) {
 				DPUT("Invalid MAC address\n");
 				usage();
 			}
 			staptr = (u8*)&station;
-			break;
-		case 'T':
-			if(!(timeout = atoi(optarg))) {
-				DPRINT("Invalid timeout '%s'\n", optarg);
-				usage();
-			}
-			break;
-		case 'l':
-			if(strlen(optarg) < 1) {
-				DPUT("Invalid matchlist\n");
-				usage();
-			}
-			void11_load_matchlist(optarg);
-			break;
-		case 'p':
-		  printf("x");
-			void11_match = atoi(optarg) ? VOID11_MATCH_BLACK : VOID11_MATCH_WHITE;
 			break;
 		case 't':
 			type = atoi(optarg);
@@ -485,6 +365,7 @@ int main(int argc, char *argv[])
 		usage();
 	iface = argv[optind];
 
+	//initiation of void11
 	if(void11_init(&void11, iface) != 0)
 		kill(getpid(), SIGQUIT);
 
