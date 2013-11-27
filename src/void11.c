@@ -176,6 +176,8 @@ int void11_flush(hostapd *void11)
 	return(hostapd_ioctl(void11, &param));
 }
 
+// quite similar to hapd_init_sock@receive.c & another function
+// init sock
 int void11_init(hostapd *void11, char *iface)
 {
 	int ret = 0;

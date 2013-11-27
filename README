@@ -29,6 +29,10 @@ debug: if (show_errors) {
 				      id, elen, left); \
 } while (0)		      
 
+match hostapd_data to struct hostap_driver_data@driver_hostap.h
+because it includes hostapd_data&sock
+
+
 void11::
 void11.c: 
 int void11_deauth_all_stas(hostapd *void11, u8 *station, u8 *bssid) {
