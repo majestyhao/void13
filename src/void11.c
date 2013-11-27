@@ -83,7 +83,7 @@ struct void11_ap *void11_read(hostapd *void11) {
 	if ((len = read(void11->sock, buf, sizeof(buf))) < 0)
 		return (NULL);
 
-	if (void11->conf->debug >= HOSTAPD_DEBUG_MSGDUMPS + 1) {
+	if (void11->hapd->conf->debug >= HOSTAPD_DEBUG_MSGDUMPS + 1) {
 		int i;
 		DPUT("  dump:");
 		for (i = 0; i < len; i++)
@@ -147,22 +147,22 @@ int void11_flush(hostapd *void11) {
 int void11_init(hostapd *void11, char *iface) {
 	int ret = 0;
 
-	snprintf(void11->conf->iface, sizeof(void11->conf->iface), "%s", iface);
+	snprintf(void11->hapd->conf->iface, sizeof(void11->hapd->conf->iface), "%s", iface);
 
     //to here as same as receive.c
 	// except the last line at receive.c
 	hostapd_init_sockets(void11);
-	void11->conf->ssid_len = 2;
+	void11->hapd->conf->ssid.ssid_len = 2;
 
-	if (strlen(void11->conf->ssid) < 1) {
-		memset(void11->conf->ssid, 0, void11->conf->ssid_len);
-		strcpy(void11->conf->ssid, " "); //, void11->conf->ssid_len);
+	if (strlen(void11->hapd->conf->ssid.ssid) < 1) {
+		memset(void11->hapd->conf->ssid.ssid, 0, void11->hapd->conf->ssid.ssid_len);
+		strcpy(void11->hapd->conf->ssid.ssid, " "); //, void11->hapd->conf->ssid.ssid_len);
 	}
 
 	/* Set SSID for the kernel driver (to be used in beacon and probe
 	 * response frames) */
-	if ((ret = hostap_ioctl_setiwessid(void11, void11->conf->ssid,
-			void11->conf->ssid_len)) != 0) {
+	if ((ret = hostap_ioctl_setiwessid(void11, void11->hapd->conf->ssid.ssid,
+			void11->hapd->conf->ssid.ssid_len)) != 0) {
 		DPUT("Could not set SSID for kernel driver\n");
 		void11_exit(void11);
 		return (ret);

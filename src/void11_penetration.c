@@ -40,7 +40,7 @@ static int client_connections = 1; /* do not change: initial value */
 static int match_ssid = 0;
 static pid_t ppid;
 static char *staptr = NULL;
-static hostapd void11; //create void11
+static struct hostap_driver_data void11; //create void11
 
 LIST_HEAD(aps_head, entry) aps_black_head, aps_match_head;
 struct aps_head *aps_headp;
@@ -116,7 +116,7 @@ static void void11_signal_exit(int signal)
 		LIST_REMOVE(aps_black_head.lh_first, entries);
 	}
 
-	if(void11.conf->debug)
+	if(void11.hapd.conf->debug)
 		DPUT("bye!\n");
 
 	void11_exit(&void11);
